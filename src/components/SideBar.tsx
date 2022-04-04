@@ -1,50 +1,45 @@
-import { createContext, ReactNode, useContext } from "react";
-import { SideBarContext } from '../moviesContext'
+import { useEffect, useState } from "react";
+import { Button } from '../components/Button';
+import { api } from "../services/api";
 
-interface SiderBarProviderProps {
-  children: ReactNode;
+
+interface GenreResponseProps {
+  id: number;
+  name: 'action' | 'comedy' | 'documentary' | 'drama' | 'horror' | 'family';
+  title: string;
 }
 
-const Sidebar = createContext(SideBarContext);
+interface SideBarProps {
+  handleClickButton:(id: number) => void;
+  selectedGenreId: number;
+}
 
-export function SideBar({children}: SiderBarProviderProps) {
-    <div style={{ display: 'flex', flexDirection: 'row' }}>
-      <nav className="sidebar">
-        <span>Watch<p>Me</p></span>
+export function SideBar({handleClickButton, selectedGenreId}: SideBarProps) {
+  const [genres, setGenres] = useState<GenreResponseProps[]>([]);
 
-        <div className="buttons-container">
-          {genres.map(genre => (
-            <Button
-              key={String(genre.id)}
-              title={genre.title}
-              iconName={genre.name}
-              onClick={() => handleClickButton(genre.id)}
-              selected={selectedGenreId === genre.id}
-            />
-          ))}
-        </div>
 
-      </nav>
-
-      <div className="container">
-        <header>
-          <span className="category">Categoria:<span> {selectedGenre.title}</span></span>
-        </header>
-
-        <main>
-          <div className="movies-list">
-            {movies.map(movie => (
-              <MovieCard key ={movie.imdbID} title={movie.Title} poster={movie.Poster} runtime={movie.Runtime} rating={movie.Ratings[0].Value} />
-            ))}
-          </div>
-        </main>
-      </div>
-    </div>
+  useEffect(() => {
+    api.get<GenreResponseProps[]>('genres').then(response => {
+      setGenres(response.data);
+    });
+  }, []);
 
   return (
-    <SideBarContext.Provider value={[]}>
-        {children}
-    </SideBarContext.Provider>
-  )
+    <nav className="sidebar">
+      <span>Watch<p>Me</p></span>
 
+      <div className="buttons-container">
+        {genres.map(genre => (
+          <Button
+            key={String(genre.id)}
+            title={genre.title}
+            iconName={genre.name}
+            onClick={() => handleClickButton(genre.id)}
+            selected={selectedGenreId === genre.id}
+          />
+        ))}
+      </div>
+
+    </nav>
+  )
 }
